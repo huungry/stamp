@@ -1,0 +1,7 @@
+<configuration debug="false" scan="true">
+
+  <root level="${TEST_LOG_LEVEL:-INFO}">
+    <appender-ref ref="STDOUT"/>
+  </root>
+
+</configuration>
