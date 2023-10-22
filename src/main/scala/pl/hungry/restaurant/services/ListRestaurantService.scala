@@ -14,6 +14,7 @@ class ListRestaurantService(
   restaurantRepository: RestaurantRepository[ConnectionIO],
   restaurantUserRepository: RestaurantUserRepository[ConnectionIO],
   transactor: Transactor[IO]) {
+
   def listRelated(authContext: AuthContext): IO[List[Restaurant]] = {
     val effect = for {
       restaurantUsers <- listRestaurantUsers(authContext.userId)

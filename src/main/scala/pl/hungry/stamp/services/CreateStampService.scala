@@ -25,6 +25,8 @@ class CreateStampService(
   userInternalService: UserInternalService,
   transactor: Transactor[IO]) {
 
+  private type ErrorOr[T] = EitherT[ConnectionIO, CreateStampError, T]
+
   def create(
     authContext: AuthContext,
     restaurantId: RestaurantId,
@@ -42,16 +44,16 @@ class CreateStampService(
     effect.value.transact(transactor)
   }
 
-  private def ensureNotSelfRequest(userId: UserId, request: CreateStampRequest): EitherT[ConnectionIO, CreateStampError, Unit] =
+  private def ensureNotSelfRequest(userId: UserId, request: CreateStampRequest): ErrorOr[Unit] =
     EitherT.cond[ConnectionIO](userId != request.forUserId, (), CreateStampError.UserRequestedThemself())
 
-  private def ensureRestaurantUserExists(userId: UserId, restaurantId: RestaurantId): EitherT[ConnectionIO, CreateStampError, RestaurantUser] =
+  private def ensureRestaurantUserExists(userId: UserId, restaurantId: RestaurantId): ErrorOr[RestaurantUser] =
     EitherT.fromOptionF(restaurantInternalService.findRestaurantUser(userId, restaurantId), CreateStampError.RestaurantUserNotFound())
 
-  private def ensureRequestedUserExists(request: CreateStampRequest): EitherT[ConnectionIO, CreateStampError, UserView] =
+  private def ensureRequestedUserExists(request: CreateStampRequest): ErrorOr[UserView] =
     EitherT.fromOptionF(userInternalService.find(request.forUserId), CreateStampError.ClientNotFound())
 
-  private def getTime: EitherT[ConnectionIO, CreateStampError, Instant] =
+  private def getTime: ErrorOr[Instant] =
     EitherT.right(Clock[ConnectionIO].realTimeInstant)
 
   private def prepareStamp(
@@ -61,7 +63,7 @@ class CreateStampService(
   ) =
     Stamp.from(restaurantId, request, now)
 
-  private def insert(stamp: Stamp): EitherT[ConnectionIO, CreateStampError, Int] =
+  private def insert(stamp: Stamp): ErrorOr[Int] =
     EitherT.liftF(stampRepository.insert(stamp))
 }
 

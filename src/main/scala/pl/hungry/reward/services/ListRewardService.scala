@@ -18,6 +18,9 @@ class ListRewardService(
   rewardRepository: RewardRepository[ConnectionIO],
   restaurantInternalService: RestaurantInternalService,
   transactor: Transactor[IO]) {
+
+  private type ErrorOr[T] = EitherT[ConnectionIO, ListRewardError, T]
+
   def listActive(authContext: AuthContext, restaurantId: RestaurantId): IO[Either[ListRewardError, List[Reward]]] = {
     val effect = for {
       restaurantUser <- findRestaurantUser(authContext.userId, restaurantId)
@@ -28,13 +31,13 @@ class ListRewardService(
     effect.value.transact(transactor)
   }
 
-  private def findRestaurantUser(userId: UserId, restaurantId: RestaurantId): EitherT[ConnectionIO, ListRewardError, RestaurantUser] =
+  private def findRestaurantUser(userId: UserId, restaurantId: RestaurantId): ErrorOr[RestaurantUser] =
     EitherT.fromOptionF(restaurantInternalService.findRestaurantUser(userId, restaurantId), ListRewardError.RestaurantUserNotFound())
 
-  private def ensureHasAccess(restaurantUser: RestaurantUser): EitherT[ConnectionIO, ListRewardError, Unit] =
+  private def ensureHasAccess(restaurantUser: RestaurantUser): ErrorOr[Unit] =
     EitherT.cond[ConnectionIO](restaurantUser.position == Position.Manager, (), ListRewardError.NotManager())
 
-  private def listActiveRewards(restaurantId: RestaurantId): EitherT[ConnectionIO, ListRewardError, List[Reward]] =
+  private def listActiveRewards(restaurantId: RestaurantId): ErrorOr[List[Reward]] =
     EitherT.liftF(rewardRepository.listActive(restaurantId))
 }
 

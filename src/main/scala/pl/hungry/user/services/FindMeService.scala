@@ -12,6 +12,9 @@ import pl.hungry.user.services.FindMeService.FindMeError
 import pl.hungry.utils.error.DomainError
 
 class FindMeService(userRepository: UserRepository[ConnectionIO], transactor: Transactor[IO]) {
+
+  private type ErrorOr[T] = EitherT[ConnectionIO, FindMeError, T]
+
   def find(authContext: AuthContext): IO[Either[FindMeError, UserView]] = {
     val effect = for {
       user <- findUser(authContext.userId)
@@ -20,7 +23,7 @@ class FindMeService(userRepository: UserRepository[ConnectionIO], transactor: Tr
     effect.value.transact(transactor)
   }
 
-  private def findUser(userId: UserId): EitherT[ConnectionIO, FindMeError, User] =
+  private def findUser(userId: UserId): ErrorOr[User] =
     EitherT.fromOptionF(userRepository.find(userId), FindMeError.NotFound())
 }
 

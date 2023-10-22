@@ -21,6 +21,9 @@ class CreateRestaurantService(
   restaurantRepository: RestaurantRepository[ConnectionIO],
   restaurantUserRepository: RestaurantUserRepository[ConnectionIO],
   transactor: Transactor[IO]) {
+
+  private type ErrorOr[T] = EitherT[ConnectionIO, CreateRestaurantError, T]
+
   def create(authContext: AuthContext, createRestaurantRequest: CreateRestaurantRequest): IO[Either[CreateRestaurantError, Restaurant]] = {
     val effect = for {
       user <- findUser(authContext.userId)
@@ -37,13 +40,13 @@ class CreateRestaurantService(
     effect.value.transact(transactor)
   }
 
-  private def findUser(userId: UserId): EitherT[ConnectionIO, CreateRestaurantError, UserView] =
+  private def findUser(userId: UserId): ErrorOr[UserView] =
     EitherT.fromOptionF(userInternalService.find(userId), CreateRestaurantError.UserNotFound())
 
-  private def ensureIsAuthorized(user: UserView): EitherT[ConnectionIO, CreateRestaurantError, Unit] =
+  private def ensureIsAuthorized(user: UserView): ErrorOr[Unit] =
     EitherT.cond[ConnectionIO](user.role == UserRole.Pro, (), CreateRestaurantError.NotPro())
 
-  private def getTime: EitherT[ConnectionIO, CreateRestaurantError, Instant] =
+  private def getTime: ErrorOr[Instant] =
     EitherT.right(Clock[ConnectionIO].realTimeInstant)
 
   private def prepareRestaurant(createRestaurantRequest: CreateRestaurantRequest, now: Instant): Restaurant =
@@ -56,10 +59,10 @@ class CreateRestaurantService(
   ): RestaurantUser =
     RestaurantUser.from(restaurant, userId, Position.Manager, now)
 
-  private def insertRestaurant(restaurant: Restaurant): EitherT[ConnectionIO, CreateRestaurantError, Int] =
+  private def insertRestaurant(restaurant: Restaurant): ErrorOr[Int] =
     EitherT.liftF(restaurantRepository.insert(restaurant))
 
-  private def insertRestaurantUser(restaurantUser: RestaurantUser): EitherT[ConnectionIO, CreateRestaurantError, Int] =
+  private def insertRestaurantUser(restaurantUser: RestaurantUser): ErrorOr[Int] =
     EitherT.liftF(restaurantUserRepository.insert(restaurantUser))
 }
 

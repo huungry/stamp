@@ -20,6 +20,9 @@ class CreateRewardService(
   rewardRepository: RewardRepository[ConnectionIO],
   restaurantInternalService: RestaurantInternalService,
   transactor: Transactor[IO]) {
+
+  private type ErrorOr[T] = EitherT[ConnectionIO, CreateRewardError, T]
+
   def create(
     authContext: AuthContext,
     restaurantId: RestaurantId,
@@ -36,13 +39,13 @@ class CreateRewardService(
     effect.value.transact(transactor)
   }
 
-  private def findRestaurantUser(userId: UserId, restaurantId: RestaurantId): EitherT[ConnectionIO, CreateRewardError, RestaurantUser] =
+  private def findRestaurantUser(userId: UserId, restaurantId: RestaurantId): ErrorOr[RestaurantUser] =
     EitherT.fromOptionF(restaurantInternalService.findRestaurantUser(userId, restaurantId), CreateRewardError.RestaurantUserNotFound())
 
-  private def ensureHasAccess(restaurantUser: RestaurantUser): EitherT[ConnectionIO, CreateRewardError, Unit] =
+  private def ensureHasAccess(restaurantUser: RestaurantUser): ErrorOr[Unit] =
     EitherT.cond[ConnectionIO](restaurantUser.position == Position.Manager, (), CreateRewardError.NotManager())
 
-  private def ensureNameNotExists(name: RewardName, restaurantId: RestaurantId): EitherT[ConnectionIO, CreateRewardError, Unit] =
+  private def ensureNameNotExists(name: RewardName, restaurantId: RestaurantId): ErrorOr[Unit] =
     EitherT {
       rewardRepository.findActive(name, restaurantId).map {
         case Some(_) => CreateRewardError.NameAlreadyExists().asLeft
@@ -50,7 +53,7 @@ class CreateRewardService(
       }
     }
 
-  private def insert(reward: Reward): EitherT[ConnectionIO, CreateRewardError, Int] =
+  private def insert(reward: Reward): ErrorOr[Int] =
     EitherT.liftF(rewardRepository.insert(reward))
 }
 

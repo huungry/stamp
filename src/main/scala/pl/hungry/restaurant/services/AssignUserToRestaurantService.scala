@@ -22,6 +22,9 @@ class AssignUserToRestaurantService(
   restaurantRepository: RestaurantRepository[ConnectionIO],
   restaurantUserRepository: RestaurantUserRepository[ConnectionIO],
   transactor: Transactor[IO]) {
+
+  private type ErrorOr[T] = EitherT[ConnectionIO, AssignUserToRestaurantError, T]
+
   def assign(
     authContext: AuthContext,
     restaurantId: RestaurantId,
@@ -42,16 +45,19 @@ class AssignUserToRestaurantService(
     effect.value.transact(transactor)
   }
 
-  private def findUser(userId: UserId): EitherT[ConnectionIO, AssignUserToRestaurantError, UserView] =
+  private def findUser(userId: UserId): ErrorOr[UserView] =
     EitherT.fromOptionF(userInternalService.find(userId), AssignUserToRestaurantError.UserNotFound())
 
-  private def findRestaurant(id: RestaurantId): EitherT[ConnectionIO, AssignUserToRestaurantError, Restaurant] =
+  private def findRestaurant(id: RestaurantId): ErrorOr[Restaurant] =
     EitherT.fromOptionF(restaurantRepository.findActive(id), AssignUserToRestaurantError.RestaurantNotFound())
 
-  private def ensureIsAuthorized(userId: UserId, restaurantId: RestaurantId): EitherT[ConnectionIO, AssignUserToRestaurantError, RestaurantUser] =
-    EitherT.fromOptionF(restaurantUserRepository.findActiveWithPosition(userId, restaurantId, Position.Manager), AssignUserToRestaurantError.NotManager())
+  private def ensureIsAuthorized(userId: UserId, restaurantId: RestaurantId): ErrorOr[RestaurantUser] =
+    EitherT.fromOptionF(
+      restaurantUserRepository.findActiveWithPosition(userId, restaurantId, Position.Manager),
+      AssignUserToRestaurantError.NotManager()
+    )
 
-  private def ensureNotAlreadyAssigned(userId: UserId, restaurantId: RestaurantId): EitherT[ConnectionIO, AssignUserToRestaurantError, Unit] =
+  private def ensureNotAlreadyAssigned(userId: UserId, restaurantId: RestaurantId): ErrorOr[Unit] =
     EitherT {
       restaurantUserRepository.findActive(userId, restaurantId).map {
         case Some(_) => AssignUserToRestaurantError.AlreadyAssigned().asLeft
@@ -59,7 +65,7 @@ class AssignUserToRestaurantService(
       }
     }
 
-  private def getTime: EitherT[ConnectionIO, AssignUserToRestaurantError, Instant] =
+  private def getTime: ErrorOr[Instant] =
     EitherT.right(Clock[ConnectionIO].realTimeInstant)
 
   private def prepareRestaurantUser(
@@ -69,7 +75,7 @@ class AssignUserToRestaurantService(
   ): RestaurantUser =
     RestaurantUser.from(restaurant, request.userId, request.position, now)
 
-  private def insertRestaurantUser(restaurantUser: RestaurantUser): EitherT[ConnectionIO, AssignUserToRestaurantError, Int] =
+  private def insertRestaurantUser(restaurantUser: RestaurantUser): ErrorOr[Int] =
     EitherT.liftF(restaurantUserRepository.insert(restaurantUser))
 }
 

@@ -19,6 +19,9 @@ class CreateUserService(
   userRepository: UserRepository[ConnectionIO],
   passwordService: PasswordService,
   transactor: Transactor[IO]) {
+
+  private type ErrorOr[T] = EitherT[ConnectionIO, CreateUserError, T]
+
   def create(request: CreateUserRequest): IO[Either[CreateUserError, UserView]] = {
     val effect = for {
       _   <- ensureEmailNotUsed(request.email)
@@ -36,7 +39,7 @@ class CreateUserService(
       _       <- EitherT.fromEither[ConnectionIO](userOpt.map(_ => CreateUserError.EmailAlreadyUsed().asLeft).getOrElse(().asRight))
     } yield ()
 
-  private def getTime: EitherT[ConnectionIO, CreateUserError, Instant] =
+  private def getTime: ErrorOr[Instant] =
     EitherT.right(Clock[ConnectionIO].realTimeInstant)
 
   private def prepareUser(request: CreateUserRequest, now: Instant): User = {
@@ -44,7 +47,7 @@ class CreateUserService(
     User.from(request, passwordHash, now)
   }
 
-  private def insert(user: User): EitherT[ConnectionIO, CreateUserError, Int] =
+  private def insert(user: User): ErrorOr[Int] =
     EitherT.liftF(userRepository.insert(user))
 }
 

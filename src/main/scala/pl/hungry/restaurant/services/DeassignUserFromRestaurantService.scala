@@ -21,6 +21,8 @@ class DeassignUserFromRestaurantService(
   restaurantUserRepository: RestaurantUserRepository[ConnectionIO],
   transactor: Transactor[IO]) {
 
+  private type ErrorOr[T] = EitherT[ConnectionIO, DeassignUserFromRestaurantError, T]
+
   def deassign(
     authContext: AuthContext,
     restaurantId: RestaurantId,
@@ -38,25 +40,25 @@ class DeassignUserFromRestaurantService(
     effect.value.transact(transactor)
   }
 
-  private def findUser(userId: UserId): EitherT[ConnectionIO, DeassignUserFromRestaurantError, UserView] =
+  private def findUser(userId: UserId): ErrorOr[UserView] =
     EitherT.fromOptionF(userInternalService.find(userId), DeassignUserFromRestaurantError.UserNotFound())
 
-  private def findRestaurant(id: RestaurantId): EitherT[ConnectionIO, DeassignUserFromRestaurantError, Restaurant] =
+  private def findRestaurant(id: RestaurantId): ErrorOr[Restaurant] =
     EitherT.fromOptionF(restaurantRepository.findActive(id), DeassignUserFromRestaurantError.RestaurantNotFound())
 
-  private def ensureIsAuthorized(userId: UserId, restaurantId: RestaurantId): EitherT[ConnectionIO, DeassignUserFromRestaurantError, RestaurantUser] =
+  private def ensureIsAuthorized(userId: UserId, restaurantId: RestaurantId): ErrorOr[RestaurantUser] =
     EitherT.fromOptionF(
       restaurantUserRepository.findActiveWithPosition(userId, restaurantId, Position.Manager),
       DeassignUserFromRestaurantError.NotManager()
     )
 
-  private def findRestaurantUser(userId: UserId, restaurantId: RestaurantId): EitherT[ConnectionIO, DeassignUserFromRestaurantError, RestaurantUser] =
+  private def findRestaurantUser(userId: UserId, restaurantId: RestaurantId): ErrorOr[RestaurantUser] =
     EitherT.fromOptionF(restaurantUserRepository.findActive(userId, restaurantId), DeassignUserFromRestaurantError.RestaurantUserNotFound())
 
-  private def getTime: EitherT[ConnectionIO, DeassignUserFromRestaurantError, Instant] =
+  private def getTime: ErrorOr[Instant] =
     EitherT.right(Clock[ConnectionIO].realTimeInstant)
 
-  private def archive(restaurantUser: RestaurantUser, now: Instant): EitherT[ConnectionIO, DeassignUserFromRestaurantError, Int] =
+  private def archive(restaurantUser: RestaurantUser, now: Instant): ErrorOr[Int] =
     EitherT.right(restaurantUserRepository.archive(restaurantUser.id, now))
 }
 

@@ -8,6 +8,7 @@ import pl.hungry.user.domain.UserId
 class RestaurantInternalService(
   restaurantRepository: RestaurantRepository[ConnectionIO],
   restaurantUserRepository: RestaurantUserRepository[ConnectionIO]) {
+
   def findActive(restaurantId: RestaurantId): ConnectionIO[Option[Restaurant]] = restaurantRepository.findActive(restaurantId)
 
   def findRestaurantUser(userId: UserId, restaurantId: RestaurantId): ConnectionIO[Option[RestaurantUser]] =

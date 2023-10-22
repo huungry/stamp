@@ -17,6 +17,9 @@ class LoginService(
   authRepository: AuthRepository[ConnectionIO],
   passwordService: PasswordService,
   transactor: Transactor[IO]) {
+
+  private type ErrorOr[T] = EitherT[ConnectionIO, LoginError, T]
+
   def login(request: LoginRequest): IO[Either[LoginError, JwtToken]] = {
     val effect = for {
       user  <- ensureUserExists(request.email)
@@ -27,13 +30,13 @@ class LoginService(
     effect.value.transact(transactor)
   }
 
-  private def ensureUserExists(email: UserEmail): EitherT[ConnectionIO, LoginError, AuthUser] =
+  private def ensureUserExists(email: UserEmail): ErrorOr[AuthUser] =
     EitherT.fromOptionF(authRepository.find(email), LoginError.InvalidCredentials())
 
-  private def validateCredentials(candidate: PasswordPlain, hash: PasswordHash): EitherT[ConnectionIO, LoginError, Unit] =
+  private def validateCredentials(candidate: PasswordPlain, hash: PasswordHash): ErrorOr[Unit] =
     EitherT.cond[ConnectionIO](passwordService.isValid(candidate, hash), (), LoginError.InvalidCredentials())
 
-  private def generateToken(userId: UserId): EitherT[ConnectionIO, LoginError, JwtToken] =
+  private def generateToken(userId: UserId): ErrorOr[JwtToken] =
     EitherT.fromOptionF[ConnectionIO, LoginError, JwtToken](authService.encode(userId), LoginError.InvalidCredentials())
 }
 
