@@ -28,8 +28,7 @@ class DeassignUserToRestaurantSpec extends BaseItTest with RestaurantGenerators 
 
     endpoints
       .sendDeleteRequest(path = s"http://test.com/restaurants/${restaurant.id.value}/users/${user.id.value}", bearerOpt = Some(token))
-      .body
-      .shouldDeserializeTo[Unit]
+      .code.code shouldBe 204: Unit
 
     db.findActiveRestaurantUser(user.id) shouldBe None
   }
