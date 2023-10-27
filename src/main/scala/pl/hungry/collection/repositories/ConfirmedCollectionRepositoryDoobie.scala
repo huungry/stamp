@@ -3,7 +3,6 @@ package pl.hungry.collection.repositories
 import doobie.ConnectionIO
 import doobie.implicits._
 import doobie.postgres.implicits._
-import doobie.refined.implicits._
 import pl.hungry.collection.domain.ConfirmedCollection
 import pl.hungry.collection.repositories.ConfirmedCollectionRepositoryDoobie._
 

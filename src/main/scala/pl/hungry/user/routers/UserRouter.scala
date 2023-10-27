@@ -19,6 +19,7 @@ class UserRouter(
   createUserService: CreateUserService,
   findMeService: FindMeService) {
   import pl.hungry.user.protocols.UserCodecs._
+  import pl.hungry.user.protocols.UserSchemas._
   import pl.hungry.utils.error.DomainErrorCodecs._
 
   private val createUserEndpoint: ServerEndpoint[Any, IO] = endpoint.post

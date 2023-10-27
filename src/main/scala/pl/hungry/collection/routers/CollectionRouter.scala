@@ -2,7 +2,8 @@ package pl.hungry.collection.routers
 
 import cats.effect.IO
 import pl.hungry.auth.routers.AuthRouter.BearerEndpoint
-import pl.hungry.collection.domain.{CollectionId, ConfirmedCollection, UnconfirmedCollection}
+import pl.hungry.collection.domain.CollectionId
+import pl.hungry.collection.domain.dto.{ConfirmedCollectionDto, UnconfirmedCollectionDto}
 import pl.hungry.collection.routers.CollectionRouter._
 import pl.hungry.collection.services.ConfirmCollectionService.ConfirmCollectionError
 import pl.hungry.collection.services.CreateCollectionService.CreateCollectionError
@@ -25,7 +26,7 @@ class CollectionRouter(
   private val createCollectionEndpoint: ServerEndpoint[Any, IO] =
     bearerEndpoint.post
       .in(restaurantsPath / path[RestaurantId] / rewardsPath / path[RewardId] / collectionsPath)
-      .out(jsonBody[UnconfirmedCollection])
+      .out(jsonBody[UnconfirmedCollectionDto])
       .errorOutVariants(
         oneOfVariant(statusCode(StatusCode.NotFound).and(jsonBody[CreateCollectionError.RewardNotFound])),
         oneOfVariant(statusCode(StatusCode.NotFound).and(jsonBody[CreateCollectionError.RestaurantNotFound])),
@@ -43,7 +44,7 @@ class CollectionRouter(
   private val confirmCollectionEndpoint: ServerEndpoint[Any, IO] =
     bearerEndpoint.post
       .in(restaurantsPath / path[RestaurantId] / rewardsPath / path[RewardId] / collectionsPath / path[CollectionId] / confirmPath)
-      .out(jsonBody[ConfirmedCollection])
+      .out(jsonBody[ConfirmedCollectionDto])
       .errorOutVariants(
         oneOfVariant(statusCode(StatusCode.NotFound).and(jsonBody[ConfirmCollectionError.UnconfirmedCollectionNotFound])),
         oneOfVariant(statusCode(StatusCode.NotFound).and(jsonBody[ConfirmCollectionError.RewardNotFound])),

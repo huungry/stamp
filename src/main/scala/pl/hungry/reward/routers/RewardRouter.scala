@@ -20,6 +20,7 @@ class RewardRouter(
   createRewardService: CreateRewardService,
   listRewardService: ListRewardService) {
   import pl.hungry.reward.protocols.RewardCodecs._
+  import pl.hungry.reward.protocols.RewardSchemas._
   import pl.hungry.utils.error.DomainErrorCodecs._
 
   private val createRewardEndpoint: ServerEndpoint[Any, IO] =

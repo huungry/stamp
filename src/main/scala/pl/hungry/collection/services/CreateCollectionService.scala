@@ -9,6 +9,7 @@ import doobie.util.transactor.Transactor
 import eu.timepit.refined.types.numeric.PosInt
 import pl.hungry.auth.domain.AuthContext
 import pl.hungry.collection.domain.UnconfirmedCollection
+import pl.hungry.collection.domain.dto.UnconfirmedCollectionDto
 import pl.hungry.collection.repositories.UnconfirmedCollectionRepository
 import pl.hungry.collection.services.CreateCollectionService.CreateCollectionError
 import pl.hungry.restaurant.domain.{Restaurant, RestaurantId}
@@ -34,7 +35,7 @@ class CreateCollectionService(
 
   private type ErrorOr[T] = EitherT[ConnectionIO, CreateCollectionError, T]
 
-  def create(authContext: AuthContext, rewardId: RewardId): IO[Either[CreateCollectionError, UnconfirmedCollection]] = {
+  def create(authContext: AuthContext, rewardId: RewardId): IO[Either[CreateCollectionError, UnconfirmedCollectionDto]] = {
     val effect = for {
       reward <- ensureRewardExists(rewardId)
       restaurantId = reward.restaurantId
@@ -45,7 +46,7 @@ class CreateCollectionService(
       _             <- markStampsAsUsed(stampsIdToUse, now)
       unconfirmedCollection = createUnconfirmedCollection(authContext.userId, rewardId, stampsIdToUse, now)
       _ <- insertUnconfirmedCollection(unconfirmedCollection)
-    } yield unconfirmedCollection
+    } yield UnconfirmedCollectionDto.from(unconfirmedCollection)
 
     effect.value.transact(transactor)
   }

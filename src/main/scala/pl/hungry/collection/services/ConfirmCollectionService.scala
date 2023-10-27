@@ -6,6 +6,7 @@ import doobie.ConnectionIO
 import doobie.implicits._
 import doobie.util.transactor.Transactor
 import pl.hungry.auth.domain.AuthContext
+import pl.hungry.collection.domain.dto.ConfirmedCollectionDto
 import pl.hungry.collection.domain.{CollectionId, ConfirmedCollection, UnconfirmedCollection}
 import pl.hungry.collection.repositories.{ConfirmedCollectionRepository, UnconfirmedCollectionRepository}
 import pl.hungry.collection.services.ConfirmCollectionService.ConfirmCollectionError
@@ -27,7 +28,7 @@ class ConfirmCollectionService(
 
   private type ErrorOr[T] = EitherT[ConnectionIO, ConfirmCollectionError, T]
 
-  def confirm(authContext: AuthContext, collectionId: CollectionId): IO[Either[ConfirmCollectionError, ConfirmedCollection]] = {
+  def confirm(authContext: AuthContext, collectionId: CollectionId): IO[Either[ConfirmCollectionError, ConfirmedCollectionDto]] = {
     val effect = for {
       unconfirmedCollection <- findUnconfirmedCollection(collectionId)
       reward                <- ensureRewardExists(unconfirmedCollection.rewardId)
@@ -37,7 +38,7 @@ class ConfirmCollectionService(
       confirmedCollection = buildConfirmedCollection(unconfirmedCollection, authContext.userId, now)
       _ <- insertConfirmedCollection(confirmedCollection)
       _ <- deleteUnconfirmedCollection(unconfirmedCollection)
-    } yield confirmedCollection
+    } yield ConfirmedCollectionDto.from(confirmedCollection)
 
     effect.value.transact(transactor)
   }

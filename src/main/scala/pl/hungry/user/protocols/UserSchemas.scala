@@ -9,4 +9,6 @@ object UserSchemas {
   implicit val lastNameSchema: Schema[LastName]      = Schema.string
   implicit val nickNameSchema: Schema[NickName]      = Schema.string
   implicit val passwordSchema: Schema[PasswordPlain] = Schema.string
+
+  implicit val userRoleSchema: Schema[UserRole] = Schema.derivedEnumeration[UserRole].defaultStringBased
 }

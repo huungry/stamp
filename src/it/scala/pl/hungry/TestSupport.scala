@@ -14,6 +14,6 @@ trait TestSupport extends EitherValues {
       result.flatMap(parser.parse).flatMap(_.as[T]).value
 
     def shouldIncludeErrorMessage(message: String): Unit =
-      result.swap.value should include(message)
+      result.swap.value should include(message): Unit
   }
 }

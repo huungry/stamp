@@ -8,12 +8,7 @@ import pl.hungry.restaurant.routers.in.{AssignUserToRestaurantRequest, CreateRes
 import pl.hungry.restaurant.services.AssignUserToRestaurantService.AssignUserToRestaurantError
 import pl.hungry.restaurant.services.CreateRestaurantService.CreateRestaurantError
 import pl.hungry.restaurant.services.DeassignUserFromRestaurantService.DeassignUserFromRestaurantError
-import pl.hungry.restaurant.services.{
-  AssignUserToRestaurantService,
-  CreateRestaurantService,
-  DeassignUserFromRestaurantService,
-  ListRestaurantService
-}
+import pl.hungry.restaurant.services._
 import pl.hungry.user.domain.UserId
 import sttp.model.StatusCode
 import sttp.tapir._
@@ -28,6 +23,7 @@ class RestaurantRouter(
   createRestaurantService: CreateRestaurantService,
   listRestaurantService: ListRestaurantService) {
   import pl.hungry.restaurant.protocols.RestaurantCodecs._
+  import pl.hungry.restaurant.protocols.RestaurantSchemas._
   import pl.hungry.utils.error.DomainErrorCodecs._
 
   private val createRestaurantEndpoint: ServerEndpoint[Any, IO] =
@@ -62,7 +58,7 @@ class RestaurantRouter(
   private val deassignUserToRestaurantEndpoint: ServerEndpoint[Any, IO] =
     bearerEndpoint.delete
       .in(restaurants / path[RestaurantId] / users / path[UserId])
-      .out(jsonBody[Unit])
+      .out(statusCode(StatusCode.NoContent))
       .errorOutVariants(
         oneOfVariant(statusCode(StatusCode.NotFound).and(jsonBody[DeassignUserFromRestaurantError.UserNotFound])),
         oneOfVariant(statusCode(StatusCode.NotFound).and(jsonBody[DeassignUserFromRestaurantError.RestaurantNotFound])),

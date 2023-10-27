@@ -15,6 +15,7 @@ import sttp.tapir.server.{PartialServerEndpoint, ServerEndpoint}
 
 class AuthRouter(authService: AuthService, loginService: LoginService) {
   import pl.hungry.auth.protocols.AuthCodecs._
+  import pl.hungry.user.protocols.UserSchemas._
   import pl.hungry.utils.error.DomainErrorCodecs._
 
   val bearerEndpoint: BearerEndpoint =
@@ -24,10 +25,15 @@ class AuthRouter(authService: AuthService, loginService: LoginService) {
       .errorOut(jsonBody[AuthError])
       .serverSecurityLogic(authService.decode)
 
-  private val loginEndpoint = endpoint.post
+  private val loginEndpoint: ServerEndpoint[Any, IO] = endpoint.post
     .in(authPath / loginPath)
     .in(jsonBody[LoginRequest])
-    .errorOut(jsonBody[LoginError])
+    .errorOut(
+      oneOf[LoginError](
+        oneOfVariant(statusCode(StatusCode.Forbidden).and(jsonBody[LoginError.InvalidCredentials])),
+        oneOfDefaultVariant(statusCode(StatusCode.Forbidden).and(jsonBody[LoginError]))
+      )
+    )
     .out(jsonBody[JwtToken])
     .serverLogic(loginService.login)
 
