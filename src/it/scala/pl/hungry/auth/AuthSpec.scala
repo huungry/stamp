@@ -4,12 +4,17 @@ import io.circe.syntax._
 import pl.hungry.BaseItTest
 import pl.hungry.auth.domain.JwtToken
 import pl.hungry.auth.routers.in.LoginRequest
+import pl.hungry.main.AppBuilder.AppModules
 
 class AuthSpec extends BaseItTest with AuthGenerators {
 
   import pl.hungry.auth.protocols.AuthCodecs._
 
-  it should "not login user with invalid credentials" in {
+  abstract class TestCase(appModules: AppModules = defaultTestAppModules) {
+    val (db, endpoints) = buildTestCaseSetup(appModules)
+  }
+
+  it should "not login user with invalid credentials" in new TestCase {
     val (_, registeredUser) = endpoints.registerUser()
 
     val request = loginRequestGen.sample.get.copy(email = registeredUser.email)
@@ -18,7 +23,7 @@ class AuthSpec extends BaseItTest with AuthGenerators {
     result.shouldIncludeErrorMessage("Invalid credentials")
   }
 
-  it should "login user with valid credentials" in {
+  it should "login user with valid credentials" in new TestCase {
     val (createUserRequest, registeredUser) = endpoints.registerUser()
 
     val request  = LoginRequest(email = registeredUser.email, password = createUserRequest.password)

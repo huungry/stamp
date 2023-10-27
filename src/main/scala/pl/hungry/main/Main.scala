@@ -23,7 +23,8 @@ object Main extends IOApp.Simple with LazyLogging {
     val resource: Resource[IO, Server] = for {
       config <- Resource.eval(AppConfig.load(appName))
       transactor = buildTransactor(config.database)
-      routes     = AppBuilder.buildModules(transactor)
+      modules    = AppBuilder.buildModules(transactor)
+      routes     = AppBuilder.buildApp(modules)
       server <- serverResource(config.http, routes)
     } yield server
 
@@ -35,10 +36,10 @@ object Main extends IOApp.Simple with LazyLogging {
 
   private def serverResource(httpConfig: HttpConfig, routes: List[ServerEndpoint[Any, IO]]): Resource[IO, Server] = {
     import pl.hungry.utils.error.DomainErrorCodecs._
-    def decodeErrorResponse(m: String): ValuedEndpointOutput[_] =
+    def encodeErrorResponse(m: String): ValuedEndpointOutput[_] =
       ValuedEndpointOutput(jsonBody[DecodeError], DecodeError(m))
 
-    val options                    = Http4sServerOptions.customiseInterceptors[IO].defaultHandlers(decodeErrorResponse).options
+    val options                    = Http4sServerOptions.customiseInterceptors[IO].defaultHandlers(encodeErrorResponse).options
     val httpRoutes: HttpRoutes[IO] = Http4sServerInterpreter[IO](options).toRoutes(routes)
     val HttpConfig(host, port)     = httpConfig
 

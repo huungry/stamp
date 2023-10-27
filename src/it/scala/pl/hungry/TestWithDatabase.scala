@@ -8,13 +8,7 @@ import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.transactor.Transactor
 import org.flywaydb.core.Flyway
-import pl.hungry.main.AppBuilder
 import pl.hungry.main.AppConfig.DatabaseConfig
-import sttp.client3.SttpBackend
-import sttp.client3.testing.SttpBackendStub
-import sttp.tapir.integ.cats.CatsMonadError
-import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.server.stub.TapirStubInterpreter
 
 import scala.annotation.tailrec
 import scala.concurrent.duration._
@@ -41,12 +35,6 @@ class TestWithDatabase(config: DatabaseConfig) extends StrictLogging {
 
     xa = xaReady.take.unsafeRunSync()
   }
-
-  lazy val app: List[ServerEndpoint[Any, IO]] = AppBuilder.buildModules(xa)
-
-  lazy val backendStub: SttpBackend[IO, Any] = TapirStubInterpreter(SttpBackendStub(new CatsMonadError[IO]()))
-    .whenServerEndpointsRunLogic(app)
-    .backend()
 
   private val flyway =
     Flyway

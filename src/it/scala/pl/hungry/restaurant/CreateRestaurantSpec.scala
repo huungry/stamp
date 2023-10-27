@@ -2,13 +2,18 @@ package pl.hungry.restaurant
 
 import io.circe.syntax._
 import pl.hungry.BaseItTest
+import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.restaurant.domain.{Position, Restaurant}
 
 class CreateRestaurantSpec extends BaseItTest with RestaurantGenerators {
 
   import pl.hungry.restaurant.protocols.RestaurantCodecs._
 
-  it should "not create restaurant for basic user" in {
+  abstract class TestCase(appModules: AppModules = defaultTestAppModules) {
+    val (db, endpoints) = buildTestCaseSetup(appModules)
+  }
+
+  it should "not create restaurant for basic user" in new TestCase {
     val (createUserRequest, user) = endpoints.registerUser()
     val token                     = endpoints.login(user.email, createUserRequest.password)
 
@@ -19,7 +24,7 @@ class CreateRestaurantSpec extends BaseItTest with RestaurantGenerators {
     db.findActiveRestaurantUser(user.id) shouldBe None
   }
 
-  it should "create restaurant for pro user with restaurant-user link" in {
+  it should "create restaurant for pro user with restaurant-user link" in new TestCase {
     val (createUserRequest, user) = endpoints.registerUser()
     val token                     = endpoints.login(user.email, createUserRequest.password)
     db.upgradeUserToPro(user.id)
@@ -28,7 +33,7 @@ class CreateRestaurantSpec extends BaseItTest with RestaurantGenerators {
     val response = endpoints.sendPostRequest(path = "http://test.com/restaurants", body = request.asJson.noSpaces, bearerOpt = Some(token))
     val result   = response.body.shouldDeserializeTo[Restaurant]
 
-    result shouldBe Restaurant(result.id, request.email, request.name, result.createdAt, None): Unit
+    result shouldBe Restaurant(result.id, request.email, request.name, result.createdAt, None)
 
     db.findActiveRestaurantUser(user.id).value shouldBe (result.id, user.id, Position.Manager)
   }

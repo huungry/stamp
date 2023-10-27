@@ -16,7 +16,23 @@ import sttp.tapir.swagger.bundle.SwaggerInterpreter
 
 object AppBuilder {
 
-  def buildModules(transactor: Transactor[IO]): List[ServerEndpoint[Any, IO]] = {
+  def buildApp(appModules: AppModules): List[ServerEndpoint[Any, IO]] = {
+
+    val apiEndpoints: List[ServerEndpoint[Any, IO]] =
+      appModules.authModule.routes.all |+|
+        appModules.collectionModule.routes.all |+|
+        appModules.restaurantModule.routes.all |+|
+        appModules.rewardModule.routes.all |+|
+        appModules.stampModule.routes.all |+|
+        appModules.stampConfigModule.routes.all |+|
+        appModules.userModule.routes.all
+
+    val docEndpoints: List[ServerEndpoint[Any, IO]] = SwaggerInterpreter().fromServerEndpoints[IO](apiEndpoints, "stamp", "1.0.0")
+
+    apiEndpoints ++ docEndpoints
+  }
+
+  def buildModules(transactor: Transactor[IO]): AppModules = {
     val authModule                     = AuthModule.make(transactor)
     val bearerEndpoint: BearerEndpoint = authModule.routes.bearerEndpoint
 
@@ -36,17 +52,15 @@ object AppBuilder {
       stampModule.stampInternalService
     )
 
-    val apiEndpoints: List[ServerEndpoint[Any, IO]] =
-      authModule.routes.all |+|
-        collectionModule.routes.all |+|
-        restaurantModule.routes.all |+|
-        rewardModule.routes.all |+|
-        stampModule.routes.all |+|
-        stampConfigModule.routes.all |+|
-        userModule.routes.all
-
-    val docEndpoints: List[ServerEndpoint[Any, IO]] = SwaggerInterpreter().fromServerEndpoints[IO](apiEndpoints, "stamp", "1.0.0")
-
-    apiEndpoints ++ docEndpoints
+    AppModules(authModule, userModule, restaurantModule, rewardModule, stampModule, stampConfigModule, collectionModule)
   }
+
+  final case class AppModules(
+    authModule: AuthModule,
+    userModule: UserModule,
+    restaurantModule: RestaurantModule,
+    rewardModule: RewardModule,
+    stampModule: StampModule,
+    stampConfigModule: StampConfigModule,
+    collectionModule: CollectionModule)
 }

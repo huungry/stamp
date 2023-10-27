@@ -46,6 +46,7 @@ lazy val stamp = (project in file(".")).settings(
     organization := "pl.hungry",
     scalaVersion := "2.13.10",
     scalacOptions := sbtOptions,
+    IntegrationTest / scalacOptions += "-Wconf:msg=unused value of type org.scalatest.Assertion.*:s",
     libraryDependencies ++= Seq(
       "com.softwaremill.sttp.tapir"   %% "tapir-http4s-server"     % tapirVersion,
       "com.softwaremill.sttp.tapir"   %% "tapir-sttp-stub-server"  % tapirVersion % "test,it",

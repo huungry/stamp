@@ -1,12 +1,28 @@
 package pl.hungry
 
+import cats.effect.IO
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.typesafe.scalalogging.StrictLogging
 import org.postgresql.jdbc.PgConnection
+import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest._
+import pl.hungry.auth.AuthModule
+import pl.hungry.auth.routers.AuthRouter.BearerEndpoint
+import pl.hungry.collection.CollectionModule
+import pl.hungry.main.AppBuilder
+import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.main.AppConfig.DatabaseConfig
+import pl.hungry.restaurant.RestaurantModule
+import pl.hungry.reward.RewardModule
+import pl.hungry.stamp.StampModule
+import pl.hungry.stampconfig.StampConfigModule
+import pl.hungry.user.UserModule
+import sttp.client3.SttpBackend
+import sttp.client3.testing.SttpBackendStub
+import sttp.tapir.integ.cats.CatsMonadError
+import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.server.stub.TapirStubInterpreter
 
 /** Based on https://github.com/softwaremill/bootzooka */
 trait BaseItTest
@@ -19,10 +35,10 @@ trait BaseItTest
     with StrictLogging
     with TestSupport {
   self: Suite =>
-  private var postgres: EmbeddedPostgres        = _
-  private var currentDbConfig: DatabaseConfig   = _
-  var url: String                               = _
-  var currentTestWithDatabase: TestWithDatabase = _
+  private var postgres: EmbeddedPostgres      = _
+  private var currentDbConfig: DatabaseConfig = _
+  var url: String                             = _
+  var currentTest: TestWithDatabase           = _
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
@@ -30,26 +46,59 @@ trait BaseItTest
     url = postgres.getJdbcUrl("postgres")
     postgres.getPostgresDatabase.getConnection.asInstanceOf[PgConnection].setPrepareThreshold(100)
     currentDbConfig = DatabaseConfig(url = url, user = "postgres", password = "", driver = "org.postgresql.Driver")
-    currentTestWithDatabase = new TestWithDatabase(currentDbConfig)
-    currentTestWithDatabase.testConnection()
+    currentTest = new TestWithDatabase(currentDbConfig)
+    currentTest.testConnection()
   }
 
   override protected def afterAll(): Unit = {
     postgres.close()
-    currentTestWithDatabase.close()
+    currentTest.close()
     super.afterAll()
   }
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
-    currentTestWithDatabase.migrate()
+    currentTest.migrate()
   }
 
   override protected def afterEach(): Unit = {
-    currentTestWithDatabase.clean()
+    currentTest.clean()
     super.afterEach()
   }
 
-  lazy val db        = new DatabaseAccess(currentTestWithDatabase.xa)
-  lazy val endpoints = new Endpoints(currentTestWithDatabase.backendStub, db: DatabaseAccess)
+  lazy val defaultTestAppModules: AppModules = {
+    val authModule                     = AuthModule.make(currentTest.xa)
+    val bearerEndpoint: BearerEndpoint = authModule.routes.bearerEndpoint
+
+    val userModule       = UserModule.make(currentTest.xa, authModule.passwordService, bearerEndpoint)
+    val restaurantModule = RestaurantModule.make(currentTest.xa, bearerEndpoint, userModule.userInternalService)
+    val rewardModule     = RewardModule.make(currentTest.xa, bearerEndpoint, restaurantModule.restaurantInternalService)
+    val stampModule = StampModule.make(currentTest.xa, bearerEndpoint, userModule.userInternalService, restaurantModule.restaurantInternalService)
+    val stampConfigModule =
+      StampConfigModule.make(currentTest.xa, bearerEndpoint, restaurantModule.restaurantInternalService, rewardModule.rewardInternalService)
+
+    val collectionModule = CollectionModule.make(
+      currentTest.xa,
+      bearerEndpoint,
+      restaurantModule.restaurantInternalService,
+      rewardModule.rewardInternalService,
+      stampConfigModule.stampConfigInternalService,
+      stampModule.stampInternalService
+    )
+
+    AppModules(authModule, userModule, restaurantModule, rewardModule, stampModule, stampConfigModule, collectionModule)
+  }
+
+  def buildTestCaseSetup(appModules: AppModules): (DatabaseAccess, Endpoints) = {
+    val app: List[ServerEndpoint[Any, IO]] = AppBuilder.buildApp(appModules)
+
+    val backendStub: SttpBackend[IO, Any] = TapirStubInterpreter(SttpBackendStub(new CatsMonadError[IO]()))
+      .whenServerEndpointsRunLogic(app)
+      .backend()
+
+    val db        = new DatabaseAccess(currentTest.xa)
+    val endpoints = new Endpoints(backendStub, db)
+
+    (db, endpoints)
+  }
 }
