@@ -1,0 +1,2 @@
+ALTER TABLE stamp
+    ADD COLUMN used_at TIMESTAMPTZ NULL;
