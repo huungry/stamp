@@ -7,9 +7,9 @@ import eu.timepit.refined.types.numeric.PosInt
 import io.circe.syntax._
 import pl.hungry.auth.domain.JwtToken
 import pl.hungry.auth.routers.in.LoginRequest
-import pl.hungry.restaurant.RestaurantGenerators
 import pl.hungry.restaurant.domain.{Position, Restaurant, RestaurantId, RestaurantUser}
 import pl.hungry.restaurant.routers.in.AssignUserToRestaurantRequest
+import pl.hungry.restaurant.{DatabaseAccessRestaurant, RestaurantGenerators}
 import pl.hungry.reward.RewardGenerators
 import pl.hungry.reward.domain.Reward
 import pl.hungry.stamp.domain.Stamp
@@ -22,7 +22,9 @@ import pl.hungry.user.domain._
 import pl.hungry.user.routers.in.CreateUserRequest
 import sttp.client3.{Response, SttpBackend, UriContext, basicRequest}
 
-class Endpoints(backendStub: SttpBackend[IO, Any], db: DatabaseAccess)
+class Endpoints(
+  backendStub: SttpBackend[IO, Any],
+  dbAccessRestaurant: DatabaseAccessRestaurant) // TODO remove db after payment service... endpoints should not depend on db access
     extends UserGenerators
     with RestaurantGenerators
     with RewardGenerators
@@ -30,11 +32,11 @@ class Endpoints(backendStub: SttpBackend[IO, Any], db: DatabaseAccess)
     with TestSupport {
 
   import pl.hungry.auth.protocols.AuthCodecs._
-  import pl.hungry.user.protocols.UserCodecs._
   import pl.hungry.restaurant.protocols.RestaurantCodecs._
+  import pl.hungry.reward.protocols.RewardCodecs._
   import pl.hungry.stamp.protocols.StampCodecs._
   import pl.hungry.stampconfig.protocols.StampConfigCodecs._
-  import pl.hungry.reward.protocols.RewardCodecs._
+  import pl.hungry.user.protocols.UserCodecs._
 
   def sendPostRequest(
     path: String,
@@ -112,7 +114,7 @@ class Endpoints(backendStub: SttpBackend[IO, Any], db: DatabaseAccess)
   def createUserAndRestaurant(): (UserView, JwtToken, Restaurant) = {
     val (createUserRequest, userView) = registerUser()
     val token                         = login(userView.email, createUserRequest.password)
-    db.upgradeUserToPro(userView.id)
+    dbAccessRestaurant.upgradeUserToPro(userView.id)
 
     val request = createRestaurantRequestGen.sample.get
     val restaurant = sendPostRequest(path = "http://test.com/restaurants", body = request.asJson.noSpaces, bearerOpt = Some(token)).body

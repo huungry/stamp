@@ -5,7 +5,7 @@ import io.circe.syntax._
 import pl.hungry.BaseItTest
 import pl.hungry.auth.domain.JwtToken
 import pl.hungry.main.AppBuilder.AppModules
-import pl.hungry.restaurant.domain.{Position, RestaurantId, RestaurantUser}
+import pl.hungry.restaurant.domain.{Position, RestaurantId}
 import pl.hungry.reward.domain.Reward
 import pl.hungry.stampconfig.domain.StampConfig
 import pl.hungry.stampconfig.routers.in.CreateStampConfigRequest
@@ -15,7 +15,7 @@ class CreateStampConfigSpec extends BaseItTest with StampConfigGenerators {
   import pl.hungry.stampconfig.protocols.StampConfigCodecs._
 
   abstract class TestCase(appModules: AppModules = defaultTestAppModules) {
-    val (db, endpoints) = buildTestCaseSetup(appModules)
+    val (db, endpoints) = buildTestCaseSetup[DatabaseAccessStampConfig](appModules, new DatabaseAccessStampConfigFactory)
   }
 
   it should "not create stamps config for not existing restaurant" in new TestCase {
@@ -53,10 +53,7 @@ class CreateStampConfigSpec extends BaseItTest with StampConfigGenerators {
     val (_, ownerToken, restaurant)       = endpoints.createUserAndRestaurant()
     val (createEmployeeRequest, employee) = endpoints.registerUser()
     val employeeToken: JwtToken           = endpoints.login(employee.email, createEmployeeRequest.password)
-    val restaurantUser: RestaurantUser    = endpoints.assignUserToRestaurant(ownerToken, employee.id, restaurant.id, Position.Employee)
-
-    db.findActiveRestaurantUser(employee.id).value shouldBe (restaurant.id, employee.id, restaurantUser.position)
-
+    endpoints.assignUserToRestaurant(ownerToken, employee.id, restaurant.id, Position.Employee): Unit
     val request: CreateStampConfigRequest = createStampConfigRequestGen.sample.get
 
     endpoints

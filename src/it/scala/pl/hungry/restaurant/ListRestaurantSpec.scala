@@ -9,7 +9,7 @@ class ListRestaurantSpec extends BaseItTest with RestaurantGenerators {
   import pl.hungry.restaurant.protocols.RestaurantCodecs._
 
   abstract class TestCase(appModules: AppModules = defaultTestAppModules) {
-    val (db, endpoints) = buildTestCaseSetup(appModules)
+    val (db, endpoints) = buildTestCaseSetup[DatabaseAccessRestaurant](appModules, new DatabaseAccessRestaurantFactory)
   }
 
   it should "list user's related restaurants" in new TestCase {

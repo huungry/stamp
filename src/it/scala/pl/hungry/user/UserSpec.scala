@@ -10,7 +10,7 @@ class UserSpec extends BaseItTest with UserGenerators {
   import pl.hungry.user.protocols.UserCodecs._
 
   abstract class TestCase(appModules: AppModules = defaultTestAppModules) {
-    val (db, endpoints) = buildTestCaseSetup(appModules)
+    val (db, endpoints) = buildTestCaseSetup[DatabaseAccessUser](appModules, new DatabaseAccessUserFactory)
   }
 
   it should "not create user with the same email" in new TestCase {

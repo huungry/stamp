@@ -11,7 +11,7 @@ class AuthSpec extends BaseItTest with AuthGenerators {
   import pl.hungry.auth.protocols.AuthCodecs._
 
   abstract class TestCase(appModules: AppModules = defaultTestAppModules) {
-    val (db, endpoints) = buildTestCaseSetup(appModules)
+    val (db, endpoints) = buildTestCaseSetup[DatabaseAccessAuth](appModules, new DatabaseAccessAuthFactory)
   }
 
   it should "not login user with invalid credentials" in new TestCase {
