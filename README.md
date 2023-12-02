@@ -33,7 +33,6 @@ Every time you visit your favorite café and make a purchase, you have the optio
 
 ## Still to do...
 - Add missing integration tests
-  - Add missing db state checks after tests 
   - `ConfirmCollectionSpec`
   - `FindStampConfigSpec`
   - Db access tests

@@ -21,6 +21,8 @@ class UserSpec extends BaseItTest with UserGenerators {
     val response = endpoints.sendPostRequest(path = "http://test.com/accounts/users", body = request.asJson.noSpaces, bearerOpt = None)
 
     response.body.shouldIncludeErrorMessage("Email already used")
+
+    db.countActiveUsersByEmail(existingUser.email) shouldBe 1
   }
 
   it should "create user" in new TestCase {
@@ -40,5 +42,7 @@ class UserSpec extends BaseItTest with UserGenerators {
       blockedAt = None,
       archivedAt = None
     )
+
+    db.countActiveUsersByEmail(request.email) shouldBe 1
   }
 }
