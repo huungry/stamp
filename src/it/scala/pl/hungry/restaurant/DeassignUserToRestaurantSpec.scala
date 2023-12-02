@@ -3,11 +3,12 @@ package pl.hungry.restaurant
 import pl.hungry.BaseItTest
 import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.restaurant.domain.Position
+import pl.hungry.restaurant.utils.{DatabaseAccessRestaurant, DatabaseAccessRestaurantFactory, RestaurantGenerators}
 
 class DeassignUserToRestaurantSpec extends BaseItTest with RestaurantGenerators {
 
   abstract class TestCase(appModules: AppModules = defaultTestAppModules) {
-    val (db, endpoints) = buildTestCaseSetup(appModules)
+    val (db, endpoints) = buildTestCaseSetup[DatabaseAccessRestaurant](appModules, new DatabaseAccessRestaurantFactory)
   }
 
   it should "not deassign user from restaurant by employee" in new TestCase {

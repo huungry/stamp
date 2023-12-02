@@ -7,13 +7,14 @@ import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.restaurant.domain.Position
 import pl.hungry.reward.domain.Reward
 import pl.hungry.reward.routers.in.CreateRewardRequest
+import pl.hungry.reward.utils.{DatabaseAccessReward, DatabaseAccessRewardFactory, RewardGenerators}
 
 class CreateRewardSpec extends BaseItTest with RewardGenerators {
 
   import pl.hungry.reward.protocols.RewardCodecs._
 
   abstract class TestCase(appModules: AppModules = defaultTestAppModules) {
-    val (db, endpoints) = buildTestCaseSetup(appModules)
+    val (db, endpoints) = buildTestCaseSetup[DatabaseAccessReward](appModules, new DatabaseAccessRewardFactory)
   }
 
   it should "not create reward by not existing restaurant-user" in new TestCase {

@@ -5,6 +5,7 @@ import pl.hungry.BaseItTest
 import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.stamp.domain.Stamp
 import pl.hungry.stamp.routers.in.CreateStampRequest
+import pl.hungry.stamp.utils.{DatabaseAccessStamp, DatabaseAccessStampFactory}
 import pl.hungry.user.domain.UserId
 
 class CreateStampSpec extends BaseItTest {
@@ -12,7 +13,7 @@ class CreateStampSpec extends BaseItTest {
   import pl.hungry.stamp.protocols.StampCodecs._
 
   abstract class TestCase(appModules: AppModules = defaultTestAppModules) {
-    val (db, endpoints) = buildTestCaseSetup(appModules)
+    val (db, endpoints) = buildTestCaseSetup[DatabaseAccessStamp](appModules, new DatabaseAccessStampFactory)
   }
 
   it should "not create stamp for not existing user" in new TestCase {

@@ -1,4 +1,4 @@
-package pl.hungry.restaurant
+package pl.hungry.restaurant.utils
 
 import org.scalacheck.{Arbitrary, Gen}
 import pl.hungry.Generators

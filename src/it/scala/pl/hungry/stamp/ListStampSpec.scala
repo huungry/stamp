@@ -5,13 +5,14 @@ import pl.hungry.BaseItTest
 import pl.hungry.auth.domain.JwtToken
 import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.stamp.domain.StampView
+import pl.hungry.stamp.utils.{DatabaseAccessStamp, DatabaseAccessStampFactory}
 
 class ListStampSpec extends BaseItTest {
 
   import pl.hungry.stamp.protocols.StampCodecs._
 
   abstract class TestCase(appModules: AppModules = defaultTestAppModules) {
-    val (db, endpoints) = buildTestCaseSetup(appModules)
+    val (db, endpoints) = buildTestCaseSetup[DatabaseAccessStamp](appModules, new DatabaseAccessStampFactory)
   }
 
   it should "list user's stamps" in new TestCase {
