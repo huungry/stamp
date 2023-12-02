@@ -5,6 +5,7 @@ import pl.hungry.auth.domain.JwtToken
 import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.restaurant.domain.RestaurantId
 import pl.hungry.reward.domain.Reward
+import pl.hungry.reward.utils.{DatabaseAccessReward, DatabaseAccessRewardFactory, RewardGenerators}
 
 class ListRewardSpec extends BaseItTest with RewardGenerators {
 

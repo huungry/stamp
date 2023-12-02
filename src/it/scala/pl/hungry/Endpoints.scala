@@ -9,17 +9,17 @@ import pl.hungry.auth.domain.JwtToken
 import pl.hungry.auth.routers.in.LoginRequest
 import pl.hungry.restaurant.domain.{Position, Restaurant, RestaurantId, RestaurantUser}
 import pl.hungry.restaurant.routers.in.AssignUserToRestaurantRequest
-import pl.hungry.restaurant.{DatabaseAccessRestaurant, RestaurantGenerators}
-import pl.hungry.reward.RewardGenerators
+import pl.hungry.restaurant.utils.{DatabaseAccessRestaurant, RestaurantGenerators}
 import pl.hungry.reward.domain.Reward
+import pl.hungry.reward.utils.RewardGenerators
 import pl.hungry.stamp.domain.Stamp
 import pl.hungry.stamp.routers.in.CreateStampRequest
-import pl.hungry.stampconfig.StampConfigGenerators
 import pl.hungry.stampconfig.domain.StampConfig
 import pl.hungry.stampconfig.routers.in.CreateStampConfigRequest
-import pl.hungry.user.UserGenerators
+import pl.hungry.stampconfig.utils.StampConfigGenerators
 import pl.hungry.user.domain._
 import pl.hungry.user.routers.in.CreateUserRequest
+import pl.hungry.user.utils.UserGenerators
 import sttp.client3.{Response, SttpBackend, UriContext, basicRequest}
 
 class Endpoints(

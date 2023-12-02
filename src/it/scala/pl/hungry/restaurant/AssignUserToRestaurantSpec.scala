@@ -5,6 +5,7 @@ import pl.hungry.BaseItTest
 import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.restaurant.domain.{Position, RestaurantUser}
 import pl.hungry.restaurant.routers.in.AssignUserToRestaurantRequest
+import pl.hungry.restaurant.utils.{DatabaseAccessRestaurant, DatabaseAccessRestaurantFactory, RestaurantGenerators}
 
 class AssignUserToRestaurantSpec extends BaseItTest with RestaurantGenerators {
 

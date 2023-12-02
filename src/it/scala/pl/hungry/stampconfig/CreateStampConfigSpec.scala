@@ -9,6 +9,7 @@ import pl.hungry.restaurant.domain.{Position, RestaurantId}
 import pl.hungry.reward.domain.Reward
 import pl.hungry.stampconfig.domain.StampConfig
 import pl.hungry.stampconfig.routers.in.CreateStampConfigRequest
+import pl.hungry.stampconfig.utils.{DatabaseAccessStampConfig, DatabaseAccessStampConfigFactory, StampConfigGenerators}
 
 class CreateStampConfigSpec extends BaseItTest with StampConfigGenerators {
 

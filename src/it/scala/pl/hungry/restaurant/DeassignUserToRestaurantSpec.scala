@@ -3,6 +3,7 @@ package pl.hungry.restaurant
 import pl.hungry.BaseItTest
 import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.restaurant.domain.Position
+import pl.hungry.restaurant.utils.{DatabaseAccessRestaurant, DatabaseAccessRestaurantFactory, RestaurantGenerators}
 
 class DeassignUserToRestaurantSpec extends BaseItTest with RestaurantGenerators {
 

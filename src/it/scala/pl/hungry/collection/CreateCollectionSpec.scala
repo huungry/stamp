@@ -5,6 +5,7 @@ import eu.timepit.refined.types.numeric.PosInt
 import pl.hungry.BaseItTest
 import pl.hungry.auth.domain.JwtToken
 import pl.hungry.collection.domain.dto.UnconfirmedCollectionDto
+import pl.hungry.collection.utils.{DatabaseAccessCollection, DatabaseAccessCollectionFactory}
 import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.reward.domain.{Reward, RewardId}
 import pl.hungry.stamp.domain.Stamp

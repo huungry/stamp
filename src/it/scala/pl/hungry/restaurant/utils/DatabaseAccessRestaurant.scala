@@ -1,4 +1,4 @@
-package pl.hungry.restaurant
+package pl.hungry.restaurant.utils
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global

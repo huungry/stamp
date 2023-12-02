@@ -4,6 +4,7 @@ import io.circe.syntax._
 import pl.hungry.BaseItTest
 import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.user.domain._
+import pl.hungry.user.utils.{DatabaseAccessUser, DatabaseAccessUserFactory, UserGenerators}
 
 class UserSpec extends BaseItTest with UserGenerators {
 

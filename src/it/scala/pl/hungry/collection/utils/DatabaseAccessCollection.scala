@@ -1,4 +1,4 @@
-package pl.hungry.collection
+package pl.hungry.collection.utils
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global

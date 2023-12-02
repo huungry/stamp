@@ -1,4 +1,4 @@
-package pl.hungry.stampconfig
+package pl.hungry.stampconfig.utils
 
 import cats.data.NonEmptyList
 import org.scalacheck.{Arbitrary, Gen}

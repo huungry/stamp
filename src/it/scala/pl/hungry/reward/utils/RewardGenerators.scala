@@ -1,4 +1,4 @@
-package pl.hungry.reward
+package pl.hungry.reward.utils
 
 import org.scalacheck.{Arbitrary, Gen}
 import pl.hungry.Generators

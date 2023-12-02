@@ -1,4 +1,4 @@
-package pl.hungry.stamp
+package pl.hungry.stamp.utils
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global

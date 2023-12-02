@@ -1,14 +1,12 @@
-package pl.hungry.auth
+package pl.hungry.auth.utils
 
 import cats.effect.IO
 import doobie.util.transactor.Transactor
 import pl.hungry.{DatabaseAccess, DatabaseAccessFactory}
 
-import scala.annotation.unused
-
 class DatabaseAccessAuthFactory extends DatabaseAccessFactory {
   override def create(transactor: Transactor[IO]): DatabaseAccess =
-    new DatabaseAccessAuth(transactor)
+    new DatabaseAccessAuth()
 }
 
-class DatabaseAccessAuth(@unused xa: Transactor[IO]) extends DatabaseAccess
+class DatabaseAccessAuth() extends DatabaseAccess

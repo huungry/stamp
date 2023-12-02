@@ -5,6 +5,7 @@ import pl.hungry.BaseItTest
 import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.stamp.domain.Stamp
 import pl.hungry.stamp.routers.in.CreateStampRequest
+import pl.hungry.stamp.utils.{DatabaseAccessStamp, DatabaseAccessStampFactory}
 import pl.hungry.user.domain.UserId
 
 class CreateStampSpec extends BaseItTest {

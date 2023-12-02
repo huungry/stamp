@@ -7,6 +7,7 @@ import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.restaurant.domain.Position
 import pl.hungry.reward.domain.Reward
 import pl.hungry.reward.routers.in.CreateRewardRequest
+import pl.hungry.reward.utils.{DatabaseAccessReward, DatabaseAccessRewardFactory, RewardGenerators}
 
 class CreateRewardSpec extends BaseItTest with RewardGenerators {
 

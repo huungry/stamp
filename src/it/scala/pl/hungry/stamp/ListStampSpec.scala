@@ -5,6 +5,7 @@ import pl.hungry.BaseItTest
 import pl.hungry.auth.domain.JwtToken
 import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.stamp.domain.StampView
+import pl.hungry.stamp.utils.{DatabaseAccessStamp, DatabaseAccessStampFactory}
 
 class ListStampSpec extends BaseItTest {
 

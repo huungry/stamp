@@ -13,7 +13,8 @@ import pl.hungry.collection.CollectionModule
 import pl.hungry.main.AppBuilder
 import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.main.AppConfig.DatabaseConfig
-import pl.hungry.restaurant.{DatabaseAccessRestaurant, DatabaseAccessRestaurantFactory, RestaurantModule}
+import pl.hungry.restaurant.utils.{DatabaseAccessRestaurant, DatabaseAccessRestaurantFactory}
+import pl.hungry.restaurant.RestaurantModule
 import pl.hungry.reward.RewardModule
 import pl.hungry.stamp.StampModule
 import pl.hungry.stampconfig.StampConfigModule
@@ -89,14 +90,17 @@ trait BaseItTest
     AppModules(authModule, userModule, restaurantModule, rewardModule, stampModule, stampConfigModule, collectionModule)
   }
 
-  def buildTestCaseSetup[DbAccess <: DatabaseAccess](appModules: AppModules, dbAccessFactory: DatabaseAccessFactory): (DbAccess, Endpoints) = {
+  def buildTestCaseSetup[ModuleDatabaseAccess <: DatabaseAccess](
+    appModules: AppModules,
+    dbAccessFactory: DatabaseAccessFactory
+  ): (ModuleDatabaseAccess, Endpoints) = {
     val app: List[ServerEndpoint[Any, IO]] = AppBuilder.buildApp(appModules)
 
     val backendStub: SttpBackend[IO, Any] = TapirStubInterpreter(SttpBackendStub(new CatsMonadError[IO]()))
       .whenServerEndpointsRunLogic(app)
       .backend()
 
-    val db = dbAccessFactory.create(currentTest.xa).asInstanceOf[DbAccess]
+    val db = dbAccessFactory.create(currentTest.xa).asInstanceOf[ModuleDatabaseAccess]
     val dbAccessRestaurant = // TODO remove after payment service... endpoints should not depend on db access
       new DatabaseAccessRestaurantFactory()
         .create(currentTest.xa)

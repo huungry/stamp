@@ -4,6 +4,7 @@ import io.circe.syntax._
 import pl.hungry.BaseItTest
 import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.restaurant.domain.{Position, Restaurant}
+import pl.hungry.restaurant.utils.{DatabaseAccessRestaurant, DatabaseAccessRestaurantFactory, RestaurantGenerators}
 
 class CreateRestaurantSpec extends BaseItTest with RestaurantGenerators {
 
