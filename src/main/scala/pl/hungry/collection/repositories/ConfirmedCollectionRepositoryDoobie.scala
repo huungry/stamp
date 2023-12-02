@@ -4,9 +4,10 @@ import doobie.ConnectionIO
 import doobie.implicits._
 import doobie.postgres.implicits._
 import pl.hungry.collection.domain.ConfirmedCollection
+import pl.hungry.collection.protocols.CollectionDoobieCodecs
 import pl.hungry.collection.repositories.ConfirmedCollectionRepositoryDoobie._
 
-final class ConfirmedCollectionRepositoryDoobie extends ConfirmedCollectionRepository[ConnectionIO] {
+final class ConfirmedCollectionRepositoryDoobie extends ConfirmedCollectionRepository[ConnectionIO] with CollectionDoobieCodecs {
 
   override def insert(confirmedCollection: ConfirmedCollection): ConnectionIO[Int] =
     sql"""INSERT INTO $table VALUES

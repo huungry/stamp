@@ -20,4 +20,11 @@ class DatabaseAccessCollection(xa: Transactor[IO]) extends DatabaseAccess {
       .unique
       .transact(xa)
       .unsafeRunSync()
+
+  def countUserConfirmedCollections(userId: UserId): Int =
+    sql"SELECT COUNT(*) FROM confirmed_collection WHERE user_id = ${userId.value}"
+      .query[Int]
+      .unique
+      .transact(xa)
+      .unsafeRunSync()
 }

@@ -32,13 +32,7 @@ Every time you visit your favorite café and make a purchase, you have the optio
 <img alt="stamp_m_2.png" src="github/stamp_m_2.png" width="300"/>
 
 ## Still to do...
-- Add missing integration tests
-  - `ConfirmCollectionSpec`
-  - `FindStampConfigSpec`
-  - Db access tests
-  - Consider splitting `pl.hungry.Endpoints`
-  - Test `pl.hungry.Endpoints`
-  - Test `pl.hungry.DatabaseAccess`
+- Use UUID Generator
 - Add docker-compose for local development
 - Add instructions how to run locally
 - Implement refresh token

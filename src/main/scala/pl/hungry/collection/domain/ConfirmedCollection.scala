@@ -1,6 +1,5 @@
 package pl.hungry.collection.domain
 
-import cats.data.NonEmptyList
 import io.scalaland.chimney.dsl._
 import pl.hungry.reward.domain.RewardId
 import pl.hungry.stamp.domain.StampId
@@ -12,7 +11,7 @@ final case class ConfirmedCollection(
   id: CollectionId,
   userId: UserId,
   rewardId: RewardId,
-  stampsIdUsed: NonEmptyList[StampId],
+  stampsIdUsed: List[StampId],
   createdAt: Instant,
   confirmedBy: UserId,
   confirmedAt: Instant)

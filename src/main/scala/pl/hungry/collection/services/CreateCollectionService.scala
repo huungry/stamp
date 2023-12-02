@@ -89,7 +89,7 @@ class CreateCollectionService(
     rewardId: RewardId,
     stampsId: NonEmptyList[StampId],
     now: Instant
-  ): UnconfirmedCollection = UnconfirmedCollection.from(userId, rewardId, stampsId, now)
+  ): UnconfirmedCollection = UnconfirmedCollection.from(userId, rewardId, stampsId.toList, now)
 
   private def insertUnconfirmedCollection(unconfirmedCollection: UnconfirmedCollection): ErrorOr[Int] =
     EitherT.liftF(unconfirmedCollectionRepository.insert(unconfirmedCollection))
