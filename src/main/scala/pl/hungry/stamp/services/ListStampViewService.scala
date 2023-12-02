@@ -8,13 +8,16 @@ import pl.hungry.auth.domain.AuthContext
 import pl.hungry.stamp.domain.StampView
 import pl.hungry.stamp.repositories.StampRepository
 
-class ListStampService(stampRepository: StampRepository[ConnectionIO], transactor: Transactor[IO]) {
+class ListStampViewService(stampRepository: StampRepository[ConnectionIO], transactor: Transactor[IO]) {
   def listView(authContext: AuthContext): IO[List[StampView]] = {
     val query = for {
       now        <- Clock[ConnectionIO].realTimeInstant
       stampsView <- stampRepository.listView(authContext.userId, now)
     } yield stampsView.sortWith { case (a, b) =>
-      a.stampsToReward.map(_.value - a.count.value).getOrElse(1000) < b.stampsToReward.map(_.value - b.count.value).getOrElse(1000)
+      val stillNeededForRewardA = a.stampsToReward.fold(Int.MaxValue)(_.value - a.collectedStamps.value)
+      val stillNeededForRewardB = b.stampsToReward.fold(Int.MaxValue)(_.value - b.collectedStamps.value)
+
+      stillNeededForRewardA < stillNeededForRewardB
     }
 
     query.transact(transactor)

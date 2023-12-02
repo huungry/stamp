@@ -7,7 +7,7 @@ import pl.hungry.stamp.domain.{Stamp, StampView}
 import pl.hungry.stamp.routers.StampRouter._
 import pl.hungry.stamp.routers.in.CreateStampRequest
 import pl.hungry.stamp.services.CreateStampService.CreateStampError
-import pl.hungry.stamp.services.{CreateStampService, ListStampService}
+import pl.hungry.stamp.services.{CreateStampService, ListStampViewService}
 import sttp.model.StatusCode
 import sttp.tapir._
 import sttp.tapir.generic.auto._
@@ -17,7 +17,7 @@ import sttp.tapir.server.ServerEndpoint
 class StampRouter(
   bearerEndpoint: BearerEndpoint,
   createStampService: CreateStampService,
-  listStampService: ListStampService) {
+  listStampService: ListStampViewService) {
   import pl.hungry.stamp.protocols.StampCodecs._
   import pl.hungry.restaurant.protocols.RestaurantSchemas._
   import pl.hungry.utils.error.DomainErrorCodecs._

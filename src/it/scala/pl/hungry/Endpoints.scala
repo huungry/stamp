@@ -134,7 +134,7 @@ class Endpoints(
       .shouldDeserializeTo[RestaurantUser]
   }
 
-  def addStampForUser(
+  def createStampForUser(
     userId: UserId,
     restaurantId: RestaurantId,
     creatorToken: JwtToken

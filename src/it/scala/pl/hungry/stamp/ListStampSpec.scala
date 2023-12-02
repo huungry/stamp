@@ -18,7 +18,7 @@ class ListStampSpec extends BaseItTest {
   it should "list user's stamps" in new TestCase {
     val (_, token, restaurant)                        = endpoints.createUserAndRestaurant()
     val (visitingUserCreateRequest, visitingUserView) = endpoints.registerUser()
-    endpoints.addStampForUser(visitingUserView.id, restaurant.id, token): Unit
+    endpoints.createStampForUser(visitingUserView.id, restaurant.id, token): Unit
 
     val visitingUserJwtToken: JwtToken = endpoints.login(visitingUserView.email, visitingUserCreateRequest.password)
 

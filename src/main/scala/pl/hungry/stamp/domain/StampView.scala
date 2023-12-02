@@ -7,4 +7,4 @@ final case class StampView(
   restaurantId: RestaurantId,
   restaurantName: RestaurantName,
   stampsToReward: Option[PosInt],
-  count: PosInt)
+  collectedStamps: PosInt)

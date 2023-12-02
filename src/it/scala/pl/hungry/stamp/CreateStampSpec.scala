@@ -60,7 +60,7 @@ class CreateStampSpec extends BaseItTest {
     val (_, token, restaurant) = endpoints.createUserAndRestaurant()
     val (_, visitingUserView)  = endpoints.registerUser()
 
-    val response = endpoints.addStampForUser(visitingUserView.id, restaurant.id, token)
+    val response = endpoints.createStampForUser(visitingUserView.id, restaurant.id, token)
 
     response shouldBe Stamp(
       id = response.id,

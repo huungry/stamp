@@ -85,7 +85,7 @@ class CreateStampConfigSpec extends BaseItTest with StampConfigGenerators {
     db.countStampsConfig(restaurant.id) shouldBe 0
   }
 
-  it should "not create stamps config by restaurant manager" in new TestCase {
+  it should "create stamps config by restaurant manager" in new TestCase {
     val (_, ownerToken, restaurant)       = endpoints.createUserAndRestaurant()
     val reward: Reward                    = endpoints.createRewardForRestaurant(restaurant.id, ownerToken)
     val request: CreateStampConfigRequest = createStampConfigRequestGen.sample.get.copy(rewards = NonEmptyList.fromListUnsafe(List(reward.id)))

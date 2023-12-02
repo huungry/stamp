@@ -103,7 +103,7 @@ class CreateCollectionSpec extends BaseItTest {
 
     val (createVisitorRequest, visitor) = endpoints.registerUser()
     val visitorToken: JwtToken          = endpoints.login(visitor.email, createVisitorRequest.password)
-    val stamp: Stamp                    = endpoints.addStampForUser(visitor.id, restaurant.id, token)
+    val stamp: Stamp                    = endpoints.createStampForUser(visitor.id, restaurant.id, token)
 
     val response: UnconfirmedCollectionDto = endpoints
       .sendPostRequest(
