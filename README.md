@@ -32,14 +32,15 @@ Every time you visit your favorite café and make a purchase, you have the optio
 <img alt="stamp_m_2.png" src="github/stamp_m_2.png" width="300"/>
 
 ## Still to do...
+- Implement upgrading user to Pro (payment service)
+- Improve error handling using MonadError/MonadThrow
+- Add traits (with tagless final?) for services
 - Use UUID Generator
 - Add docker-compose for local development
 - Add instructions how to run locally
 - Implement refresh token
 - Implement invitation system
-  - Send invitation email by admin to new user 
-- Implement upgrading user to Pro (payment service)
-  - Fake implementation with random failing
+  - Send invitation email by admin to new user
 - Migrate to testcontainers
 - Migrate to Scala 3 to check how long will it take
 - Mobile App :)
