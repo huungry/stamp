@@ -23,7 +23,7 @@ object Main extends IOApp.Simple with LazyLogging {
     val resource: Resource[IO, Server] = for {
       config <- Resource.eval(AppConfig.load(appName))
       transactor = buildTransactor(config.database)
-      modules    = AppBuilder.buildModules(transactor)
+      modules    = AppBuilder.buildModules(transactor, config)
       routes     = AppBuilder.buildApp(modules)
       server <- serverResource(config.http, routes)
     } yield server

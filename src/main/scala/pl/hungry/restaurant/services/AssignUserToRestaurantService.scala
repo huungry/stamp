@@ -31,9 +31,10 @@ class AssignUserToRestaurantService(
     request: AssignUserToRestaurantRequest
   ): IO[Either[AssignUserToRestaurantError, RestaurantUser]] = {
     val effect = for {
-      user       <- findUser(authContext.userId)
+      authUser   <- findUser(authContext.userId)
+      _          <- findUser(request.userId)
       restaurant <- findRestaurant(restaurantId)
-      _          <- ensureIsAuthorized(user.id, restaurantId)
+      _          <- ensureIsAuthorized(authUser.id, restaurantId)
       _          <- ensureNotAlreadyAssigned(request.userId, restaurantId)
       now        <- getTime
 

@@ -10,15 +10,19 @@ import pl.hungry.auth.domain.{AuthContext, JwtToken}
 import pl.hungry.auth.repositories.AuthRepository
 import pl.hungry.auth.services.AuthService.AuthError
 import pl.hungry.auth.services.AuthService.AuthError._
+import pl.hungry.main.AppConfig.{JwtConfig, jwtConfigReader}
 import pl.hungry.user.domain.UserId
 import pl.hungry.utils.error.DomainError
 
 import scala.util.{Failure, Success}
 
-class AuthService(authRepository: AuthRepository[ConnectionIO], transactor: Transactor[IO]) {
+class AuthService(
+  authRepository: AuthRepository[ConnectionIO],
+  transactor: Transactor[IO],
+  config: JwtConfig) {
   import pl.hungry.user.protocols.UserCodecs._
 
-  private val key                           = "secretKey"
+  private val key                           = config.secret
   private val algo: JwtAlgorithm.HS256.type = JwtAlgorithm.HS256
 
   def encode(userId: UserId): ConnectionIO[Option[JwtToken]] =

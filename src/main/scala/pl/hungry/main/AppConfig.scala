@@ -2,12 +2,12 @@ package pl.hungry.main
 
 import cats.effect.IO
 import com.typesafe.scalalogging.LazyLogging
-import pl.hungry.main.AppConfig.{DatabaseConfig, HttpConfig}
+import pl.hungry.main.AppConfig.{DatabaseConfig, HttpConfig, JwtConfig}
 import pureconfig.error.ConfigReaderException
 import pureconfig.generic.semiauto.deriveReader
 import pureconfig.{ConfigReader, ConfigSource}
 
-final case class AppConfig(database: DatabaseConfig, http: HttpConfig)
+final case class AppConfig(database: DatabaseConfig, http: HttpConfig, jwt: JwtConfig)
 
 object AppConfig extends LazyLogging {
 
@@ -19,9 +19,12 @@ object AppConfig extends LazyLogging {
     password: String,
     driver: String)
 
+  final case class JwtConfig(secret: String)
+
   implicit val databaseConfigReader: ConfigReader[DatabaseConfig] = deriveReader
   implicit val httpConfigReader: ConfigReader[HttpConfig]         = deriveReader
   implicit val appConfigReader: ConfigReader[AppConfig]           = deriveReader
+  implicit val jwtConfigReader: ConfigReader[JwtConfig]           = deriveReader
 
   def load(namespace: String): IO[AppConfig] =
     ConfigSource.default.at(namespace).load[AppConfig] match {

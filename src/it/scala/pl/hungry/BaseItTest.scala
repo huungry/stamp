@@ -12,7 +12,7 @@ import pl.hungry.auth.routers.AuthRouter.BearerEndpoint
 import pl.hungry.collection.CollectionModule
 import pl.hungry.main.AppBuilder
 import pl.hungry.main.AppBuilder.AppModules
-import pl.hungry.main.AppConfig.DatabaseConfig
+import pl.hungry.main.AppConfig.{DatabaseConfig, JwtConfig}
 import pl.hungry.restaurant.utils.{DatabaseAccessRestaurant, DatabaseAccessRestaurantFactory}
 import pl.hungry.restaurant.RestaurantModule
 import pl.hungry.reward.RewardModule
@@ -68,7 +68,8 @@ trait BaseItTest
   }
 
   lazy val defaultTestAppModules: AppModules = {
-    val authModule                     = AuthModule.make(currentTest.xa)
+    val jwtConfig                      = JwtConfig("secret")
+    val authModule                     = AuthModule.make(currentTest.xa, jwtConfig)
     val bearerEndpoint: BearerEndpoint = authModule.routes.bearerEndpoint
 
     val userModule       = UserModule.make(currentTest.xa, authModule.passwordService, bearerEndpoint)

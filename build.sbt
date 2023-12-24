@@ -105,3 +105,8 @@ Seq(Defaults.itSettings: _*)
 
 enablePlugins(FlywayPlugin)
 PostgresMigrations.settings
+
+enablePlugins(JavaAppPackaging, DockerPlugin)
+
+Docker / packageName := "stamp"
+dockerBaseImage := "azul/zulu-openjdk:17.0.9"
