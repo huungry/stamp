@@ -17,6 +17,7 @@ CREATE TABLE restaurant (
 id              UUID PRIMARY KEY,
 email           TEXT NOT NULL,
 name            TEXT NOT NULL,
+created_by      UUID NOT NULL REFERENCES users(id),
 created_at      TIMESTAMPTZ NOT NULL,
 archived_at     TIMESTAMPTZ NULL
 );

@@ -26,11 +26,12 @@ class CreateRestaurantService(
 
   def create(authContext: AuthContext, createRestaurantRequest: CreateRestaurantRequest): IO[Either[CreateRestaurantError, Restaurant]] = {
     val effect = for {
-      user <- findUser(authContext.userId)
-      _    <- ensureIsAuthorized(user)
-      now  <- getTime
+      user              <- findUser(authContext.userId)
+      activeRestaurants <- countUserRestaurants(user.id)
+      _                 <- ensureLimitNotReached(user, activeRestaurants)
+      now               <- getTime
 
-      restaurant     = prepareRestaurant(createRestaurantRequest, now)
+      restaurant     = prepareRestaurant(createRestaurantRequest, user.id, now)
       restaurantUser = prepareRestaurantUser(restaurant, user.id, now)
 
       _ <- insertRestaurant(restaurant)
@@ -43,14 +44,24 @@ class CreateRestaurantService(
   private def findUser(userId: UserId): ErrorOr[UserView] =
     EitherT.fromOptionF(userInternalService.find(userId), CreateRestaurantError.UserNotFound())
 
-  private def ensureIsAuthorized(user: UserView): ErrorOr[Unit] =
-    EitherT.cond[ConnectionIO](user.role == UserRole.Pro, (), CreateRestaurantError.NotPro())
+  private def countUserRestaurants(userId: UserId): ErrorOr[Int] =
+    EitherT.liftF(restaurantRepository.countActive(userId))
+
+  private def ensureLimitNotReached(user: UserView, activeRestaurants: Int): ErrorOr[Unit] =
+    user.role match {
+      case UserRole.Pro => EitherT.rightT[ConnectionIO, CreateRestaurantError](())
+      case _            => EitherT.cond[ConnectionIO](activeRestaurants < 1, (), CreateRestaurantError.LimitReached())
+    }
 
   private def getTime: ErrorOr[Instant] =
     EitherT.right(Clock[ConnectionIO].realTimeInstant)
 
-  private def prepareRestaurant(createRestaurantRequest: CreateRestaurantRequest, now: Instant): Restaurant =
-    Restaurant.from(createRestaurantRequest, now)
+  private def prepareRestaurant(
+    createRestaurantRequest: CreateRestaurantRequest,
+    userId: UserId,
+    now: Instant
+  ): Restaurant =
+    Restaurant.from(createRestaurantRequest, userId, now)
 
   private def prepareRestaurantUser(
     restaurant: Restaurant,
@@ -69,7 +80,7 @@ class CreateRestaurantService(
 object CreateRestaurantService {
   sealed trait CreateRestaurantError extends DomainError
   object CreateRestaurantError {
-    case class UserNotFound(message: String = "User not found")              extends CreateRestaurantError
-    case class NotPro(message: String = "Only Pro users can add restaurant") extends CreateRestaurantError
+    case class UserNotFound(message: String = "User not found")                                 extends CreateRestaurantError
+    case class LimitReached(message: String = "Upgrade account to Pro to add more restaurants") extends CreateRestaurantError
   }
 }

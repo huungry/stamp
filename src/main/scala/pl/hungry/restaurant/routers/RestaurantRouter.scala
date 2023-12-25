@@ -33,7 +33,7 @@ class RestaurantRouter(
       .out(jsonBody[Restaurant])
       .errorOutVariants(
         oneOfVariant(statusCode(StatusCode.NotFound).and(jsonBody[CreateRestaurantError.UserNotFound])),
-        oneOfVariant(statusCode(StatusCode.Forbidden).and(jsonBody[CreateRestaurantError.NotPro])),
+        oneOfVariant(statusCode(StatusCode.Forbidden).and(jsonBody[CreateRestaurantError.LimitReached])),
         oneOfDefaultVariant(statusCode(StatusCode.BadRequest).and(jsonBody[CreateRestaurantError]))
       )
       .serverLogic(auth => request => createRestaurantService.create(auth, request))
