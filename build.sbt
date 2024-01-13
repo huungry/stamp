@@ -57,7 +57,7 @@ val scalacheckVersion   = "1.17.0"
 
 lazy val stamp = (project in file(".")).settings(
   name := "stamp",
-  version := "0.1.0-SNAPSHOT",
+  version := "latest",
   organization := "pl.hungry",
   scalaVersion := "2.13.10",
   scalacOptions := sbtOptions,
@@ -108,5 +108,5 @@ PostgresMigrations.settings
 
 enablePlugins(JavaAppPackaging, DockerPlugin)
 
-Docker / packageName := "stamp"
+Docker / packageName := "huungry/stamp"
 dockerBaseImage := "azul/zulu-openjdk:17.0.9"
