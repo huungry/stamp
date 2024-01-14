@@ -30,9 +30,7 @@ class AuthService(
   private val algo: JwtAlgorithm.HS256.type         = JwtAlgorithm.HS256
 
   def encode(user: AuthUser): IO[JwtToken] =
-    for {
-      now <- Clock[IO].realTimeInstant
-    } yield encodeToken(JwtContent(user.id), now)
+    Clock[IO].realTimeInstant.map(now => encodeToken(JwtContent(user.id), now))
 
   private def encodeToken(jwtContent: JwtContent, now: Instant): JwtToken = {
     val claim = JwtClaim(

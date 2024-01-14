@@ -11,10 +11,10 @@ object AuthCodecs {
   import pl.hungry.utils.refinements.RefinementsCodecs._
 
   implicit val loginRequestCodec: Codec[LoginRequest]   = deriveCodec
-  implicit val jwtTokenCodec: Codec[JwtToken]           = deriveCodec
   implicit val jwtContentCodec: Codec[JwtContent]       = deriveCodec
   implicit val loginResponseCodec: Codec[LoginResponse] = deriveCodec
 
   implicit val userAgentCodec: Codec[UserAgent]       = deriveUnwrappedCodec
   implicit val refreshTokenCodec: Codec[RefreshToken] = deriveUnwrappedCodec
+  implicit val jwtTokenCodec: Codec[JwtToken]         = deriveUnwrappedCodec
 }

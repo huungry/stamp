@@ -47,12 +47,13 @@ class LoginService(
 
   private def tryInsertRefreshToken(userId: UserId, userAgentOpt: Option[UserAgent]): ErrorOr[Option[RefreshToken]] =
     userAgentOpt match {
-      case None => EitherT.right(logger.warn("User-Agent header is empty - cannot insert refresh token").as(Option.empty[RefreshToken]))
+      case None =>
+        EitherT.right(logger.warn(s"User-Agent header is empty - cannot insert refresh token for user $userId").as(Option.empty[RefreshToken]))
       case Some(userAgent) =>
         EitherT.right {
           Clock[IO].realTimeInstant.flatMap { now =>
             val refreshToken     = RefreshToken.generate
-            val userRefreshToken = UserRefreshToken.from(userId, RefreshToken.generate, userAgent, now)
+            val userRefreshToken = UserRefreshToken.from(userId, refreshToken, userAgent, now)
             userRefreshTokenRepository.upsert(userRefreshToken).transact(transactor).map(_ => Some(refreshToken))
           }
         }
