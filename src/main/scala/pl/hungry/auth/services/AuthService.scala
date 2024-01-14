@@ -1,6 +1,5 @@
 package pl.hungry.auth.services
 
-import cats.data.OptionT
 import cats.effect.IO
 import cats.effect.kernel.Clock
 import doobie.ConnectionIO
@@ -9,12 +8,11 @@ import doobie.util.transactor.Transactor
 import io.circe.syntax.EncoderOps
 import org.typelevel.log4cats.{LoggerFactory, SelfAwareStructuredLogger}
 import pdi.jwt.{JwtAlgorithm, JwtCirce, JwtClaim}
-import pl.hungry.auth.domain.{AuthContext, JwtContent, JwtToken}
+import pl.hungry.auth.domain.{AuthContext, AuthUser, JwtContent, JwtToken}
 import pl.hungry.auth.repositories.AuthRepository
 import pl.hungry.auth.services.AuthService.AuthError._
 import pl.hungry.auth.services.AuthService._
 import pl.hungry.main.AppConfig.JwtConfig
-import pl.hungry.user.domain.UserId
 import pl.hungry.utils.error.DomainError
 
 import java.time.Instant
@@ -31,11 +29,10 @@ class AuthService(
   private val key                                   = config.secret
   private val algo: JwtAlgorithm.HS256.type         = JwtAlgorithm.HS256
 
-  def encode(userId: UserId): ConnectionIO[Option[JwtToken]] =
-    (for {
-      _   <- OptionT(authRepository.find(userId))
-      now <- OptionT.liftF(Clock[ConnectionIO].realTimeInstant)
-    } yield encodeToken(JwtContent(userId), now)).value
+  def encode(user: AuthUser): IO[JwtToken] =
+    for {
+      now <- Clock[IO].realTimeInstant
+    } yield encodeToken(JwtContent(user.id), now)
 
   private def encodeToken(jwtContent: JwtContent, now: Instant): JwtToken = {
     val claim = JwtClaim(
