@@ -18,8 +18,8 @@ class StampRouter(
   bearerEndpoint: BearerEndpoint,
   createStampService: CreateStampService,
   listStampService: ListStampViewService) {
-  import pl.hungry.stamp.protocols.StampCodecs._
   import pl.hungry.restaurant.protocols.RestaurantSchemas._
+  import pl.hungry.stamp.protocols.StampCodecs._
   import pl.hungry.utils.error.DomainErrorCodecs._
 
   private val createStampEndpoint: ServerEndpoint[Any, IO] =

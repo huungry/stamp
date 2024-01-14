@@ -7,14 +7,16 @@ import org.postgresql.jdbc.PgConnection
 import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.typelevel.log4cats.LoggerFactory
+import org.typelevel.log4cats.slf4j.Slf4jFactory
 import pl.hungry.auth.AuthModule
 import pl.hungry.auth.routers.AuthRouter.BearerEndpoint
 import pl.hungry.collection.CollectionModule
 import pl.hungry.main.AppBuilder
 import pl.hungry.main.AppBuilder.AppModules
 import pl.hungry.main.AppConfig.{DatabaseConfig, JwtConfig}
-import pl.hungry.restaurant.utils.{DatabaseAccessRestaurant, DatabaseAccessRestaurantFactory}
 import pl.hungry.restaurant.RestaurantModule
+import pl.hungry.restaurant.utils.{DatabaseAccessRestaurant, DatabaseAccessRestaurantFactory}
 import pl.hungry.reward.RewardModule
 import pl.hungry.stamp.StampModule
 import pl.hungry.stampconfig.StampConfigModule
@@ -24,6 +26,8 @@ import sttp.client3.testing.SttpBackendStub
 import sttp.tapir.integ.cats.effect.CatsMonadError
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.stub.TapirStubInterpreter
+
+import scala.concurrent.duration.FiniteDuration
 
 /** Based on https://github.com/softwaremill/bootzooka */
 trait BaseItTest
@@ -68,9 +72,10 @@ trait BaseItTest
   }
 
   lazy val defaultTestAppModules: AppModules = {
-    val jwtConfig                      = JwtConfig("secret")
-    val authModule                     = AuthModule.make(currentTest.xa, jwtConfig)
-    val bearerEndpoint: BearerEndpoint = authModule.routes.bearerEndpoint
+    implicit val logger: LoggerFactory[IO] = LoggerFactory[IO](Slf4jFactory.create[IO])
+    val jwtConfig                          = JwtConfig("secret", FiniteDuration(1, "day"))
+    val authModule                         = AuthModule.make(currentTest.xa, jwtConfig)
+    val bearerEndpoint: BearerEndpoint     = authModule.routes.bearerEndpoint
 
     val userModule       = UserModule.make(currentTest.xa, authModule.passwordService, bearerEndpoint)
     val restaurantModule = RestaurantModule.make(currentTest.xa, bearerEndpoint, userModule.userInternalService)
