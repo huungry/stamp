@@ -7,7 +7,12 @@ import pureconfig.error.ConfigReaderException
 import pureconfig.generic.semiauto.deriveReader
 import pureconfig.{ConfigReader, ConfigSource}
 
-final case class AppConfig(database: DatabaseConfig, http: HttpConfig, jwt: JwtConfig)
+import scala.concurrent.duration.FiniteDuration
+
+final case class AppConfig(
+  database: DatabaseConfig,
+  http: HttpConfig,
+  jwt: JwtConfig)
 
 object AppConfig extends LazyLogging {
 
@@ -19,7 +24,7 @@ object AppConfig extends LazyLogging {
     password: String,
     driver: String)
 
-  final case class JwtConfig(secret: String)
+  final case class JwtConfig(secret: String, expiration: FiniteDuration)
 
   implicit val databaseConfigReader: ConfigReader[DatabaseConfig] = deriveReader
   implicit val httpConfigReader: ConfigReader[HttpConfig]         = deriveReader

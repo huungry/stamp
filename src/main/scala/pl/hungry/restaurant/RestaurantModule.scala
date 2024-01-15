@@ -6,13 +6,7 @@ import doobie.util.transactor.Transactor
 import pl.hungry.auth.routers.AuthRouter.BearerEndpoint
 import pl.hungry.restaurant.repositories.{RestaurantRepository, RestaurantRepositoryDoobie, RestaurantUserRepository, RestaurantUserRepositoryDoobie}
 import pl.hungry.restaurant.routers.RestaurantRouter
-import pl.hungry.restaurant.services.{
-  AssignUserToRestaurantService,
-  CreateRestaurantService,
-  DeassignUserFromRestaurantService,
-  ListRestaurantService,
-  RestaurantInternalService
-}
+import pl.hungry.restaurant.services._
 import pl.hungry.user.services.UserInternalService
 
 final case class RestaurantModule(routes: RestaurantRouter, restaurantInternalService: RestaurantInternalService)

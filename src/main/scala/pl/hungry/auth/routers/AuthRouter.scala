@@ -1,7 +1,7 @@
 package pl.hungry.auth.routers
 
 import cats.effect.IO
-import pl.hungry.auth.domain.{AuthContext, JwtToken}
+import pl.hungry.auth.domain.{AuthContext, JwtToken, LoginResponse, UserAgent}
 import pl.hungry.auth.routers.AuthRouter._
 import pl.hungry.auth.routers.in.LoginRequest
 import pl.hungry.auth.services.AuthService.AuthError
@@ -28,14 +28,18 @@ class AuthRouter(authService: AuthService, loginService: LoginService) {
   private val loginEndpoint: ServerEndpoint[Any, IO] = endpoint.post
     .in(authPath / loginPath)
     .in(jsonBody[LoginRequest])
+    .in(header[Option[String]]("User-Agent"))
     .errorOut(
       oneOf[LoginError](
         oneOfVariant(statusCode(StatusCode.Forbidden).and(jsonBody[LoginError.InvalidCredentials])),
         oneOfDefaultVariant(statusCode(StatusCode.Forbidden).and(jsonBody[LoginError]))
       )
     )
-    .out(jsonBody[JwtToken])
-    .serverLogic(loginService.login)
+    .out(jsonBody[LoginResponse])
+    .serverLogic { input =>
+      val (request, userAgentOpt) = input
+      loginService.login(request, userAgentOpt.flatMap(UserAgent.tryFrom))
+    }
 
   val all: List[ServerEndpoint[Any, IO]] = List(loginEndpoint)
 }
