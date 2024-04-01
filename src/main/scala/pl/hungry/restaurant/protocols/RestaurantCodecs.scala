@@ -7,8 +7,8 @@ import pl.hungry.restaurant.domain._
 import pl.hungry.restaurant.routers.in.{AssignUserToRestaurantRequest, CreateRestaurantRequest}
 
 object RestaurantCodecs {
-  import pl.hungry.utils.refinements.RefinementsCodecs._
   import pl.hungry.user.protocols.UserCodecs._
+  import pl.hungry.utils.refinements.RefinementsCodecs._
 
   implicit val restaurantIdCodec: Codec[RestaurantId]         = deriveUnwrappedCodec
   implicit val restaurantUserIdCodec: Codec[RestaurantUserId] = deriveUnwrappedCodec

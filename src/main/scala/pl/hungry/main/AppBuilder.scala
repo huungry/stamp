@@ -3,6 +3,7 @@ package pl.hungry.main
 import cats.effect.IO
 import cats.implicits._
 import doobie.util.transactor.Transactor
+import org.typelevel.log4cats.LoggerFactory
 import pl.hungry.auth.AuthModule
 import pl.hungry.auth.routers.AuthRouter.BearerEndpoint
 import pl.hungry.collection.CollectionModule
@@ -34,7 +35,7 @@ object AppBuilder {
     apiEndpoints ++ docEndpoints
   }
 
-  def buildModules(transactor: Transactor[IO], config: AppConfig): AppModules = {
+  def buildModules(transactor: Transactor[IO], config: AppConfig)(implicit logger: LoggerFactory[IO]): AppModules = {
     val authModule                     = AuthModule.make(transactor, config.jwt)
     val bearerEndpoint: BearerEndpoint = authModule.routes.bearerEndpoint
 
