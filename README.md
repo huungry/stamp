@@ -1,3 +1,8 @@
+# Project on hold 🔒
+The project is currently on hold. The main goal to experiment with the tech stack has been satisfied.
+
+---
+
 # Stamp
 Stamp is a loyalty stamp-collecting app designed for café enthusiasts.
 
@@ -31,16 +36,17 @@ Every time you visit your favorite café and make a purchase, you have the optio
 <img alt="stamp_m_1.png" src="github/stamp_m_1.png" width="300"/> 
 <img alt="stamp_m_2.png" src="github/stamp_m_2.png" width="300"/>
 
-## Still to do...
+## TODO
 - Implement upgrading user to Pro (payment service)
 - Improve error handling using MonadError/MonadThrow
 - Add traits (with tagless final?) for services
 - Use UUID Generator
 - Add docker-compose for local development
 - Add instructions how to run locally
-- Implement refresh token
+- Implement refresh token usage
 - Implement invitation system
   - Send invitation email by admin to new user
 - Migrate to testcontainers
-- Migrate to Scala 3 to check how long will it take
-- Mobile App :)
+- Migrate to Scala 3
+- Add unit tests (writing only integration tests was part of an experiment 😇)
+- Mobile App
